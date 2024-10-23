@@ -14,7 +14,10 @@
 │
 ├── /jobs
 │   ├── __init__.py
-│   └── job_scraper.py
+│   ├── cleaned_jobs.txt
+│   ├── job_cleaner.py
+│   ├── job_scraper.py
+│   └── target_jobs.txt
 │
 ├── /tests
 │   └── test_job_scraper.py
