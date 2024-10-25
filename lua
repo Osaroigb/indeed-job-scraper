@@ -4,10 +4,6 @@
 │   ├── __init__.py
 │   └── bot_manager.py
 │
-├── /scraper_utils
-│   ├── __init__.py
-│   └── last_page_finder.py
-│
 ├── /database
 │   ├── __init__.py
 │   └── models.py
@@ -20,13 +16,27 @@
 │   ├── link_generator.py
 │   └── target_jobs.txt
 │
+├── /scraper_utils
+│   ├── __init__.py
+│   └── last_page_finder.py
+│
 ├── /tests
 │   └── test_job_scraper.py
 │
+├── .env.example
+│
+├── .gitignore
+│
 ├── config.py
+│
+├── deploy.sh
+│
+├── LICENSE
+│
+├── lua
 │
 ├── main.py
 │
-├── requirements.txt
+├── README.md
 │
-└── deploy.sh
+└── requirements.txt

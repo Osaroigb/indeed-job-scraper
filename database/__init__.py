@@ -1,7 +1,8 @@
 from .models import Base
-from config import DATABASE_URI
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from config import DATABASE_URI, logging
+
 
 #? Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URI)
@@ -9,10 +10,12 @@ engine = create_engine(DATABASE_URI)
 #* Create a configured "Session" class
 Session = sessionmaker(bind=engine)
 
-#! Create a session instance
-session = Session()
+def get_session():
+    return Session()
 
 #? Create all tables in the engine (if they don't exist)
 Base.metadata.create_all(engine)
 
-print("Database initialized and tables created.")
+logging.info("Database initialized and tables created.")
+logging.error("Database initialized and tables created.")
+logging.warning("Database initialized and tables created.")

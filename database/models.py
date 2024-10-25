@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
 
@@ -10,4 +10,4 @@ class JobSearch(Base):
     id = Column(Integer, primary_key=True)
     job_title = Column(String, nullable=False)
     generated_link = Column(String, nullable=False)
-    date_scraped = Column(DateTime, default=datetime.now(datetime.timezone.utc))
+    date_scraped = Column(DateTime, default=datetime.now(timezone.utc))
