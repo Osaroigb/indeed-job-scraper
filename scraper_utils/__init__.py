@@ -1,0 +1,1 @@
+from .last_page_finder import get_last_page

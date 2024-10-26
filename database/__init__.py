@@ -15,7 +15,4 @@ def get_session():
 
 #? Create all tables in the engine (if they don't exist)
 Base.metadata.create_all(engine)
-
 logging.info("Database initialized and tables created.")
-logging.error("Database initialized and tables created.")
-logging.warning("Database initialized and tables created.")

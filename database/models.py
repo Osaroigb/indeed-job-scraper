@@ -10,4 +10,5 @@ class JobSearch(Base):
     id = Column(Integer, primary_key=True)
     job_title = Column(String, nullable=False)
     generated_link = Column(String, nullable=False)
+    last_page_number = Column(Integer) 
     date_scraped = Column(DateTime, default=datetime.now(timezone.utc))

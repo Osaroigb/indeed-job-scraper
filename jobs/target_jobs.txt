@@ -229,7 +229,6 @@ Dental Laboratory Technician
 Veterinary Radiologist
 Veterinary Behaviorist
 Veterinary Nutritionist
-
 Retail Sales Associate
 Cashier
 Customer Service Representative
@@ -600,7 +599,6 @@ Mobile Payments Integration Manager
 Fintech Product Manager (Retail)
 Point-of-Sale (POS) Payments Analyst
 Retail Finance Technology Consultant
-
 Human Resources Manager
 HR Director
 Chief Human Resources Officer (CHRO)

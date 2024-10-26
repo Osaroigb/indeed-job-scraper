@@ -13,4 +13,4 @@ def clean_job_titles(input_file, output_file):
             #? Write the cleaned line to the output file
             outfile.write(cleaned_line + '\n')
 
-    logging.info(f"Cleaned job titles have been written to '{output_file}'.")
+    logging.warning(f"Cleaned job titles have been written to '{output_file}'.")
