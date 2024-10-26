@@ -4,7 +4,7 @@ from config import logging, validate_env
 from jobs.job_cleaner import clean_job_titles
 from database import engine, Base, get_session
 from scraper_utils.last_page_finder import get_last_page
-from jobs.link_generator import read_job_titles, store_generated_links
+from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
 
 
 def main():
@@ -24,8 +24,8 @@ def main():
     job_file = os.path.join(os.path.dirname(__file__), 'jobs/cleaned_jobs.txt')
     job_titles = read_job_titles(job_file)
 
-    # logging.warning("job_titles length below!")
-    # logging.info(len(job_titles))
+    logging.warning("job_titles length below!")
+    logging.info(len(job_titles))
     
     # Store generated links in the database
     store_generated_links(job_titles)
@@ -62,6 +62,10 @@ def main():
      # Log the count of job titles with no search results
     logging.info(f"Process completed: Last pages determined and stored for each job link.")
     logging.warning(f"Total job titles with no search results: {no_result_count}")
+
+     # Generate and store pagination links for each job link
+    store_pagination_links()
+    logging.info("Pagination links for each job search stored in the database.")
 
 
 if __name__ == "__main__":
