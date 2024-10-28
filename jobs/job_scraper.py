@@ -3,8 +3,7 @@ from bs4 import BeautifulSoup
 from database import get_session
 from database.models import JobListing
 from datetime import datetime, timezone
-from config import logging, SCRAPER_API_KEY
-
+from config import logging, SCRAPER_API_KEY, SCRAPER_API_URL
 
 
 def scrape_jobs_from_page(page_url, page_number, job_search_id):
@@ -13,14 +12,13 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
     """
     try:
         # Set up ScraperAPI endpoint and parameters
-        api_url = "http://api.scraperapi.com"
         params = {
             'api_key': SCRAPER_API_KEY,
             'url': page_url
         }
 
         # Make request to ScraperAPI
-        response = requests.get(api_url, params=params, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -71,3 +69,51 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
 
     except Exception as e:
         logging.error(f"Failed to scrape jobs from page {page_number} for job search ID {job_search_id}: {e}")
+
+
+def scrape_job_details(job_listing):
+    """
+    Visits an individual job link to scrape additional details like stars, job type,
+    full job description, and apply now link.
+    """
+    try:
+        # Construct the ScraperAPI request for the job link
+        params = {
+            'api_key': SCRAPER_API_KEY,
+            'url': job_listing.job_link
+        }
+
+        # Send request to ScraperAPI
+        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Extract the stars rating
+        stars_element = soup.select_one('div.css-1unnuiz span')
+        stars = stars_element.get_text(strip=True) if stars_element else "N/A"
+
+        # Extract the job type
+        job_type_element = soup.select_one('div.js-match-insights-provider-g6kqeb .js-match-insights-provider-tvvxwd')
+        job_type = job_type_element.get_text(strip=True) if job_type_element else "N/A"
+
+        # Extract the full job description
+        description_element = soup.select_one('#jobDescriptionText')
+        full_description = description_element.get_text(strip=True) if description_element else "N/A"
+
+        # Extract the "Apply Now" link
+        apply_now_element = soup.select_one('button[contenthtml="Apply now"]')
+        apply_now_link = apply_now_element['href'] if apply_now_element and apply_now_element.has_attr('href') else "N/A"
+
+        # Update job listing with new details
+        with get_session() as session:
+            listing = session.query(JobListing).filter_by(id=job_listing.id).first()
+            listing.stars = stars
+            listing.job_type = job_type
+            listing.full_description = full_description
+            listing.apply_now_link = apply_now_link
+            session.commit()
+
+        logging.info(f"Detailed information scraped for job ID {job_listing.id}")
+
+    except Exception as e:
+        logging.error(f"Failed to scrape details for job ID {job_listing.id}: {e}")

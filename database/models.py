@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey, Text
 
 Base = declarative_base()
 
@@ -31,6 +31,12 @@ class JobListing(Base):
     location = Column(String, nullable=True)
     posted_date = Column(String, nullable=True)  # May not always be a datetime
     job_link = Column(String, nullable=False)
+
+    # New fields
+    stars = Column(String, nullable=True)  # Store rating as string
+    job_type = Column(String, nullable=True)
+    full_description = Column(Text, nullable=True)  # Use Text for long descriptions
+    apply_now_link = Column(String, nullable=True)
     
     # Relationship back to JobSearch
     job_search = relationship("JobSearch", back_populates="job_listings")
