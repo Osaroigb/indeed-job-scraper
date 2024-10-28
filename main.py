@@ -3,6 +3,7 @@ from database.models import JobSearch
 from config import logging, validate_env
 from jobs.job_cleaner import clean_job_titles
 from database import engine, Base, get_session
+from jobs.job_scraper import scrape_jobs_from_page
 from scraper_utils.last_page_finder import get_last_page
 from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
 
@@ -66,6 +67,18 @@ def main():
      # Generate and store pagination links for each job link
     store_pagination_links()
     logging.info("Pagination links for each job search stored in the database.")
+
+    # Scrape job listings for each pagination link
+    with get_session() as session:
+        job_searches = session.query(JobSearch).all()
+
+        for job in job_searches:
+            if job.pagination_links:
+                
+                for page_num, page_url in enumerate(job.pagination_links, start=1):
+                    scrape_jobs_from_page(page_url, page_num, job.id)
+
+    logging.info("Job scraping completed for all paginated links.")
 
 
 if __name__ == "__main__":
