@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, JSON, ForeignKey, Text
 

@@ -1,10 +1,9 @@
 import os
+from database import engine, Base
 from config import logging, validate_env
+from bots.bot_manager import run_bot_manager
 from jobs.job_cleaner import clean_job_titles
-from database import engine, Base, get_session
-from database.models import JobListing, JobSearch
-from scraper_utils.last_page_finder import get_last_page
-from jobs.job_scraper import scrape_jobs_from_page, scrape_job_details
+from scraper_utils.last_page_finder import store_last_pages
 from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
 
 
@@ -22,9 +21,9 @@ def main():
     # Initialize the database (create tables if they don't exist)
     Base.metadata.create_all(engine)
     
+
     # Read job titles from the cleaned_jobs.txt file
-    job_file = os.path.join(os.path.dirname(__file__), 'jobs/cleaned_jobs.txt')
-    job_titles = read_job_titles(job_file)
+    job_titles = read_job_titles(output_file)
 
     logging.warning("job_titles length below!")
     logging.info(len(job_titles))
@@ -34,67 +33,49 @@ def main():
     logging.info("Process completed: Job links generated and stored.")
 
 
+    # Clean up the temporary cleaned_jobs.txt file
     try:
-        # Delete the file
-        os.remove(job_file)
-        logging.warning(f"cleaned_jobs file has been deleted.")
-    except FileNotFoundError:
-        logging.warning(f"Error: The file '{job_file}' does not exist.")
-    except PermissionError:
-        logging.warning(f"Error: You do not have permission to delete '{job_file}'.")
+        os.remove(output_file)
+        logging.info("cleaned_jobs file has been deleted.")
     except Exception as e:
-        logging.warning(f"An error occurred: {e}")
+        logging.warning(f"Failed to delete cleaned_jobs file: {e}")
 
-
-    # Initialize counter for job titles with no search results
-    no_result_count = 0
 
     # Retrieve and store last page for each job link
-    with get_session() as session:
-        job_searches = session.query(JobSearch).all()
-
-        for job in job_searches:
-            last_page = get_last_page(job.generated_link)
-            job.last_page_number = last_page
-
-            # Increment counter if there are no results for this job title
-            if last_page == 0:
-                no_result_count += 1
-
-        session.commit()
-        
-    # Log the count of job titles with no search results
-    logging.info(f"Process completed: Last pages determined and stored for each job link.")
-    logging.warning(f"Total job titles with no search results: {no_result_count}")
-
+    store_last_pages()
+    
 
     # Generate and store pagination links for each job link
     store_pagination_links()
     logging.info("Pagination links for each job search stored in the database.")
 
 
-    # Scrape job listings for each pagination link
-    with get_session() as session:
-        job_searches = session.query(JobSearch).all()
+    # # Scrape job listings for each pagination link
+    # with get_session() as session:
+    #     job_searches = session.query(JobSearch).all()
 
-        for job in job_searches:
-            if job.pagination_links:
+    #     for job in job_searches:
+    #         if job.pagination_links:
 
-                for page_num, page_url in enumerate(job.pagination_links, start=1):
-                    scrape_jobs_from_page(page_url, page_num, job.id)
+    #             for page_num, page_url in enumerate(job.pagination_links, start=1):
+    #                 scrape_jobs_from_page(page_url, page_num, job.id)
 
-    logging.info("Job scraping completed for all paginated links.")
+    # logging.info("Job scraping completed for all paginated links.")
 
 
-    # Process individual job links for additional details
-    with get_session() as session:
-        job_listings = session.query(JobListing).all()
+    # # Process individual job links for additional details
+    # with get_session() as session:
+    #     job_listings = session.query(JobListing).all()
         
-        for listing in job_listings:
-            if listing.job_link:
-                scrape_job_details(listing)
+    #     for listing in job_listings:
+    #         if listing.job_link:
+    #             scrape_job_details(listing)
 
-    logging.info("All job listings updated with detailed information.")
+    # logging.info("All job listings updated with detailed information.")
+
+    # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
+    run_bot_manager()
+    logging.info("scrape_jobs_from_page & scrape_job_details tasks completed by bot manager.")
 
 
 if __name__ == "__main__":

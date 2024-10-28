@@ -5,7 +5,9 @@ from colorlog import ColoredFormatter
 
 load_dotenv()
 
-BOT_LIMIT = 80  # Maximum number of concurrent bots
+
+MAX_BOTS = 80 # Maximum number of concurrent bots
+RETRY_LIMIT = 3
 LOCATION = 'London'  # Target job location
 DATABASE_URI = os.getenv("DATABASE_URI")
 SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY")

@@ -2,6 +2,8 @@ import time
 import random
 import requests
 from bs4 import BeautifulSoup
+from database import get_session
+from database.models import JobSearch
 from config import logging, SCRAPER_API_KEY, SCRAPER_API_URL
 
 
@@ -105,3 +107,29 @@ def get_last_page_with_scraper(search_url):
     except Exception as e:
         logging.error(f"Failed to retrieve last page for {search_url}: {e}")
         return 1
+    
+
+def store_last_pages():
+    """
+    Retrieve and store the last page for each job search link.
+    Count job titles with no search results.
+    """
+    no_result_count = 0  # Initialize counter for job titles with no search results
+
+    with get_session() as session:
+        job_searches = session.query(JobSearch).all()
+
+        for job in job_searches:
+            last_page = get_last_page_with_scraper(job.generated_link)
+            job.last_page_number = last_page
+
+            # Increment counter if there are no results for this job title
+            if last_page == 0:
+                no_result_count += 1
+                logging.warning(f"No results for {job.job_title}")
+
+        session.commit()
+
+    # Log the count of job titles with no search results
+    logging.info(f"Process completed: Last pages determined and stored for each job link.")
+    logging.warning(f"Total job titles with no search results: {no_result_count}")
