@@ -5,7 +5,7 @@ from config import logging, Config
 from database.models import JobSearch
 
 
-# Use Config class to access DATABASE_URI
+# Use Config class to access ENVs
 SCRAPER_API_KEY = Config.SCRAPER_API_KEY
 SCRAPER_API_URL = Config.SCRAPER_API_URL
 

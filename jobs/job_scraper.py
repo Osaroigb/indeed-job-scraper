@@ -6,7 +6,8 @@ from database.models import JobListing
 from datetime import datetime, timezone
 
 
-# Use Config class to access DATABASE_URI
+# Use Config class to access ENVs
+BASE_URL = Config.BASE_URL
 SCRAPER_API_KEY = Config.SCRAPER_API_KEY
 SCRAPER_API_URL = Config.SCRAPER_API_URL
 
@@ -51,7 +52,7 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
 
             # Extract job link
             job_link_element = job_title_element.get("href") if job_title_element else None
-            job_link = f"https://uk.indeed.com{job_link_element}" if job_link_element else "N/A"
+            job_link = f"{BASE_URL}{job_link_element}" if job_link_element else "N/A"
 
             # Append job data to list
             job_listings.append(JobListing(

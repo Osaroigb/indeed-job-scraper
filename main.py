@@ -1,5 +1,5 @@
 import os
-from database import engine, Base
+import requests
 from config import logging, Config
 from database.models import JobSearch
 from bots.bot_manager import run_bot_manager
@@ -8,6 +8,31 @@ from database import engine, Base, get_session
 from scraper_utils.last_page_finder import store_last_pages
 from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
 
+
+# Use Config class to access ENVs
+BASE_URL = Config.BASE_URL
+SCRAPER_API_KEY = Config.SCRAPER_API_KEY
+SCRAPER_API_URL = Config.SCRAPER_API_URL
+
+
+def scraper_api_health_check():
+    """
+    Checks if ScraperAPI is accessible. Terminates the script if unavailable.
+    """
+    params = {'api_key': SCRAPER_API_KEY, 'url': BASE_URL}
+
+    try:
+        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
+        if response.status_code == 200:
+            logging.info("ScraperAPI is reachable.")
+            return True
+        else:
+            logging.error("ScraperAPI returned an unexpected status code.")
+            return False
+    except requests.exceptions.RequestException as e:
+        logging.error(f"ScraperAPI health check failed: {e}")
+        return False
+    
 
 def log_performance_metrics():
     """
@@ -24,6 +49,11 @@ def log_performance_metrics():
 
 
 def main():
+    # Run the ScraperAPI health check before proceeding
+    if not scraper_api_health_check():
+        logging.error("ScraperAPI is down or unreachable. Exiting script.")
+        return  # Exit script if ScraperAPI is not accessible
+    
     # Validate environment variables
     Config.validate_env()
 

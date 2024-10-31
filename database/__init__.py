@@ -3,7 +3,7 @@ from config import Config, logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Use Config class to access DATABASE_URI
+# Use Config class to access ENVs
 DATABASE_URI = Config.DATABASE_URI
 
 #? Create the SQLAlchemy engine

@@ -1,6 +1,9 @@
-from config import logging
 from database import get_session
+from config import logging, Config
 from database.models import JobSearch
+
+
+BASE_URL = Config.BASE_URL
 
 
 def read_job_titles(file_path):
@@ -16,7 +19,7 @@ def read_job_titles(file_path):
 
 def generate_url(job_title, location="London"):
     formatted_title = job_title.replace(" ", "+")
-    return f"https://uk.indeed.com/jobs?q={formatted_title}&l={location}"
+    return f"{BASE_URL}/jobs?q={formatted_title}&l={location}"
 
 
 def store_generated_links(job_titles):

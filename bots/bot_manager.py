@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from jobs.job_scraper import scrape_jobs_from_page, scrape_job_details
 
 
-# Use Config class to access DATABASE_URI
+# Use Config class to access ENVs
 MAX_BOTS = Config.MAX_BOTS
 RETRY_LIMIT = Config.RETRY_LIMIT
 

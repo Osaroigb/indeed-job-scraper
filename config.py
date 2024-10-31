@@ -7,6 +7,7 @@ from colorlog import ColoredFormatter
 load_dotenv()
 
 # Constants for environment variable names
+BASE_URL_VAR = "BASE_URL"
 MAX_BOTS_VAR = "MAX_BOTS"
 RETRY_LIMIT_VAR = "RETRY_LIMIT"
 LOCATION_VAR = "LOCATION"
@@ -16,6 +17,7 @@ SCRAPER_API_URL_VAR = "SCRAPER_API_URL"
 
 # Configuration class
 class Config:
+    BASE_URL: str = os.getenv(BASE_URL_VAR)
     MAX_BOTS: int = int(os.getenv(MAX_BOTS_VAR, 5))  # Default to 5 if not set
     RETRY_LIMIT: int = int(os.getenv(RETRY_LIMIT_VAR, 3))  # Default to 3 if not set
     LOCATION: str = os.getenv(LOCATION_VAR)
@@ -32,6 +34,7 @@ class Config:
             MAX_BOTS_VAR,
             RETRY_LIMIT_VAR,
             LOCATION_VAR,
+            BASE_URL_VAR
         ]
 
         missing_vars = [var for var in required_vars if not os.getenv(var)]
