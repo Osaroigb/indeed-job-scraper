@@ -1,10 +1,15 @@
 import time
-import logging
+import requests
 from database import get_session
-from config import MAX_BOTS, RETRY_LIMIT
+from config import Config, logging
 from database.models import JobSearch, JobListing
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from jobs.job_scraper import scrape_jobs_from_page, scrape_job_details
+
+
+# Use Config class to access DATABASE_URI
+MAX_BOTS = Config.MAX_BOTS
+RETRY_LIMIT = Config.RETRY_LIMIT
 
 
 def process_job_search(job_search):
@@ -22,7 +27,7 @@ def process_job_search(job_search):
             while retry_count < RETRY_LIMIT:
                 try:
                     scrape_jobs_from_page(page_url, page_num, job_search.id)
-                    logging.info(f"Page {page_num} scraped successfully for {job_search.job_title}")
+                    logging.warning(f"Page {page_num} scraped successfully for {job_search.job_title}")
 
                     success = True
                     break
@@ -36,54 +41,83 @@ def process_job_search(job_search):
                 logging.error(f"Failed to scrape page {page_num} for {job_search.job_title} after {RETRY_LIMIT} attempts")
 
     end_time = time.time()
-    logging.info(f"Completed job search for {job_search.job_title} in {end_time - start_time:.2f} seconds")
+    logging.warning(f"Completed job search for {job_search.job_title} in {end_time - start_time:.2f} seconds")
 
 
 def process_job_listing_details(job_listing):
     """
     Process each job listing to scrape detailed job information.
+    Logs time taken, retry attempts, and error messages.
     """
+    start_time = time.time()
+    success = False
     retry_count = 0
-    
+
     while retry_count < RETRY_LIMIT:
         try:
-            # Scrape detailed job information from the job listing link
+            # Attempt to scrape job details
             scrape_job_details(job_listing)
-            break  # Break if successful
-        except Exception as e:
-            logging.error(f"Error scraping details for job ID {job_listing.id}: {e}")
+            success = True
+            logging.info(f"Successfully scraped details for job ID {job_listing.id}")
+            break  # Exit loop if successful
 
+        except requests.exceptions.Timeout:
             retry_count += 1
-            time.sleep(2 ** retry_count)  # Exponential backoff
+            logging.warning(f"Timeout error for job ID {job_listing.id}. Retry {retry_count}/{RETRY_LIMIT}.")
+            time.sleep(2 ** retry_count)  # Exponential backoff for retries
+
+        except requests.exceptions.RequestException as e:
+            retry_count += 1
+            logging.warning(f"Network error for job ID {job_listing.id}: {e}. Retry {retry_count}/{RETRY_LIMIT}.")
+            time.sleep(2 ** retry_count)
+
+        except Exception as e:
+            # Log non-network-related errors without retries
+            logging.error(f"Non-retryable error scraping details for job ID {job_listing.id}: {e}")
+            break
+
+    if not success:
+        logging.error(f"Failed to scrape details for job ID {job_listing.id} after {RETRY_LIMIT} attempts")
+
+    end_time = time.time()
+    logging.info(f"Completed job details scraping for job ID {job_listing.id} in {end_time - start_time:.2f} seconds")
 
 
 def run_bot_manager():
     """
     Run the bot manager to handle 80 concurrent bots for job searches and job details scraping.
     """
-    logging.info("Starting bot manager with concurrent scraping")
+    logging.warning("Starting bot manager with concurrent scraping")
 
+    # Phase 1: Process job searches (pagination links)
     with get_session() as session:
         job_searches = session.query(JobSearch).filter(JobSearch.pagination_links.isnot(None)).all()
-        job_listings = session.query(JobListing).filter(JobListing.apply_now_link.is_(None)).all()
 
-    # Create thread pools for parallel job scraping and details scraping
     with ThreadPoolExecutor(max_workers=MAX_BOTS) as executor:
-        futures = []
-
-        # Submit job search tasks to the pool
-        for job_search in job_searches:
-            futures.append(executor.submit(process_job_search, job_search))
-
-        # Submit job listing details tasks to the pool
-        for job_listing in job_listings:
-            futures.append(executor.submit(process_job_listing_details, job_listing))
-
-        # Collect results
+        futures = [executor.submit(process_job_search, job_search) for job_search in job_searches]
+        
+        # Collect results for job search phase
         for future in as_completed(futures):
             try:
                 future.result()  # Raise exceptions if any
             except Exception as e:
-                logging.error(f"Bot manager encountered an error: {e}")
+                logging.error(f"Bot manager encountered an error in job search phase: {e}")
 
-    logging.info("Bot manager completed all tasks.")
+    logging.warning("Job search phase completed.")
+
+    # Phase 2: Process job listing details after all paginated pages are scraped
+    with get_session() as session:
+        job_listings = session.query(JobListing).filter(JobListing.apply_now_link.is_(None)).all()
+
+    with ThreadPoolExecutor(max_workers=MAX_BOTS) as executor:
+        futures = [executor.submit(process_job_listing_details, job_listing) for job_listing in job_listings]
+
+        # Collect results for job listing details phase
+        for future in as_completed(futures):
+            try:
+                future.result()  # Raise exceptions if any
+            except Exception as e:
+                logging.error(f"Bot manager encountered an error in job listing details phase: {e}")
+
+    logging.info("Job listing details phase completed.")
+    logging.warning("Bot manager completed all tasks.")

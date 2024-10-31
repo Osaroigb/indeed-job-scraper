@@ -1,9 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 from database import get_session
+from config import logging, Config
 from database.models import JobListing
 from datetime import datetime, timezone
-from config import logging, SCRAPER_API_KEY, SCRAPER_API_URL
+
+
+# Use Config class to access DATABASE_URI
+SCRAPER_API_KEY = Config.SCRAPER_API_KEY
+SCRAPER_API_URL = Config.SCRAPER_API_URL
 
 
 def scrape_jobs_from_page(page_url, page_number, job_search_id):
@@ -74,7 +79,7 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
 def scrape_job_details(job_listing):
     """
     Visits an individual job link to scrape additional details like stars, job type,
-    full job description, and apply now link.
+    full job description, and apply now link. Retries if a timeout occurs.
     """
     try:
         # Construct the ScraperAPI request for the job link
@@ -92,6 +97,10 @@ def scrape_job_details(job_listing):
         stars_element = soup.select_one('div.css-1unnuiz span')
         stars = stars_element.get_text(strip=True) if stars_element else "N/A"
 
+        # Extract job location
+        # location_element = soup.select_one('div[data-testid="job-location"]')
+        # location = location_element.get_text(strip=True) if location_element else "N/A"
+        
         # Extract the job type
         job_type_element = soup.select_one('div.js-match-insights-provider-g6kqeb .js-match-insights-provider-tvvxwd')
         job_type = job_type_element.get_text(strip=True) if job_type_element else "N/A"
@@ -104,10 +113,15 @@ def scrape_job_details(job_listing):
         apply_now_element = soup.select_one('button[contenthtml="Apply now"]')
         apply_now_link = apply_now_element['href'] if apply_now_element and apply_now_element.has_attr('href') else "N/A"
 
+        if (apply_now_link == "N/A"):
+            apply_now_element = soup.find('button', id='indeedApplyButton').find('span')
+            apply_now_link = apply_now_element.get_text(strip=True) if apply_now_element else "N/A"
+
         # Update job listing with new details
         with get_session() as session:
             listing = session.query(JobListing).filter_by(id=job_listing.id).first()
             listing.stars = stars
+            # listing.location = location
             listing.job_type = job_type
             listing.full_description = full_description
             listing.apply_now_link = apply_now_link

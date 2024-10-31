@@ -1,8 +1,10 @@
 from .models import Base
+from config import Config, logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from config import DATABASE_URI, logging
 
+# Use Config class to access DATABASE_URI
+DATABASE_URI = Config.DATABASE_URI
 
 #? Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URI)
