@@ -10,22 +10,33 @@ from jobs.job_scraper import scrape_jobs_from_page, scrape_job_details
 def process_job_search(job_search):
     """
     Process each job search by scraping paginated links and job details.
+    Logs time taken, retry attempts, and error messages.
     """
+    start_time = time.time()
+    success = False
+
     with get_session() as session:
         for page_num, page_url in enumerate(job_search.pagination_links, start=1):
             retry_count = 0
 
             while retry_count < RETRY_LIMIT:
                 try:
-                    # Scrape each page for job listings
                     scrape_jobs_from_page(page_url, page_num, job_search.id)
-                    break  # Break if successful
+                    logging.info(f"Page {page_num} scraped successfully for {job_search.job_title}")
 
+                    success = True
+                    break
                 except Exception as e:
-                    logging.error(f"Error scraping page {page_num} for {job_search.job_title}: {e}")
-
                     retry_count += 1
+                    
+                    logging.warning(f"Retry {retry_count}/{RETRY_LIMIT} for page {page_num} of {job_search.job_title}")
                     time.sleep(2 ** retry_count)  # Exponential backoff
+
+            if not success:
+                logging.error(f"Failed to scrape page {page_num} for {job_search.job_title} after {RETRY_LIMIT} attempts")
+
+    end_time = time.time()
+    logging.info(f"Completed job search for {job_search.job_title} in {end_time - start_time:.2f} seconds")
 
 
 def process_job_listing_details(job_listing):
@@ -50,6 +61,8 @@ def run_bot_manager():
     """
     Run the bot manager to handle 80 concurrent bots for job searches and job details scraping.
     """
+    logging.info("Starting bot manager with concurrent scraping")
+
     with get_session() as session:
         job_searches = session.query(JobSearch).filter(JobSearch.pagination_links.isnot(None)).all()
         job_listings = session.query(JobListing).filter(JobListing.apply_now_link.is_(None)).all()

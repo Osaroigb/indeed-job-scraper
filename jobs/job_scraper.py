@@ -12,13 +12,13 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
     """
     try:
         # Set up ScraperAPI endpoint and parameters
-        params = {
+        payload = {
             'api_key': SCRAPER_API_KEY,
             'url': page_url
         }
 
         # Make request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=3)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -78,13 +78,13 @@ def scrape_job_details(job_listing):
     """
     try:
         # Construct the ScraperAPI request for the job link
-        params = {
+        payload = {
             'api_key': SCRAPER_API_KEY,
             'url': job_listing.job_link
         }
 
         # Send request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=3)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 

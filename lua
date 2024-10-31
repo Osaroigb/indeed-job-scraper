@@ -10,7 +10,6 @@
 │
 ├── /jobs
 │   ├── __init__.py
-│   ├── cleaned_jobs.txt
 │   ├── job_cleaner.py
 │   ├── job_scraper.py
 │   ├── link_generator.py

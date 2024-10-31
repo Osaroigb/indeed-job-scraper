@@ -6,7 +6,8 @@ from colorlog import ColoredFormatter
 load_dotenv()
 
 
-MAX_BOTS = 80 # Maximum number of concurrent bots
+# MAX_BOTS = 80 # Maximum number of concurrent bots
+MAX_BOTS = 3
 RETRY_LIMIT = 3
 LOCATION = 'London'  # Target job location
 DATABASE_URI = os.getenv("DATABASE_URI")
@@ -30,6 +31,7 @@ handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 logging.basicConfig(level=logging.INFO, handlers=[handler])
 
+# TODO: Setup for detailed logging with rotating file handler
 
 def validate_env():
     required_vars = ["DATABASE_URI", "SCRAPER_API_KEY", "SCRAPER_API_URL"]

@@ -1,17 +1,34 @@
 import os
 from database import engine, Base
+from database.models import JobSearch
 from config import logging, validate_env
 from bots.bot_manager import run_bot_manager
 from jobs.job_cleaner import clean_job_titles
+from database import engine, Base, get_session
 from scraper_utils.last_page_finder import store_last_pages
 from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
+
+
+def log_performance_metrics():
+    """
+    Logs overall performance metrics of the scraper.
+    """
+    with get_session() as session:
+        total_jobs = session.query(JobSearch).count()
+        total_scraped = session.query(JobSearch).filter(JobSearch.last_page_number.isnot(None)).count()
+        success_rate = (total_scraped / total_jobs) * 100 if total_jobs > 0 else 0
+
+        logging.info(f"Total job titles: {total_jobs}")
+        logging.info(f"Successfully scraped: {total_scraped}")
+        logging.info(f"Scraping success rate: {success_rate:.2f}%")
 
 
 def main():
     validate_env()
 
     #? Define the input and output file names using absolute paths
-    input_file = os.path.join(os.path.dirname(__file__), 'jobs/target_jobs.txt')
+    # input_file = os.path.join(os.path.dirname(__file__), 'jobs/target_jobs.txt')
+    input_file = os.path.join(os.path.dirname(__file__), 'jobs/test_jobs.txt')
     output_file = os.path.join(os.path.dirname(__file__), 'jobs/cleaned_jobs.txt')
 
     # Run the job cleaner to create cleaned_jobs.txt
@@ -73,9 +90,14 @@ def main():
 
     # logging.info("All job listings updated with detailed information.")
 
+
+
     # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
-    run_bot_manager()
-    logging.info("scrape_jobs_from_page & scrape_job_details tasks completed by bot manager.")
+    # run_bot_manager()
+    
+    # Log performance metrics after scraping
+    # log_performance_metrics()
+    # logging.info("All tasks completed and performance metrics logged")
 
 
 if __name__ == "__main__":

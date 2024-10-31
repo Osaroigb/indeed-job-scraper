@@ -74,13 +74,13 @@ def get_last_page_with_scraper(search_url):
         last_page_url = f"{search_url}&start=3000"
 
         # ScraperAPI endpoint and parameters
-        params = {
+        payload = {
             'api_key': SCRAPER_API_KEY,
             'url': last_page_url
         }
 
         # Make a request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=3)
         response.raise_for_status()  # Raise an error if the request fails
 
         # Parse HTML and extract the last page number or check for no results
