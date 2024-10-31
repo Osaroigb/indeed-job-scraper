@@ -22,7 +22,7 @@ def scraper_api_health_check():
     params = {'api_key': SCRAPER_API_KEY, 'url': BASE_URL}
 
     try:
-        response = requests.get(SCRAPER_API_URL, params=params, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=params, timeout=10)
         if response.status_code == 200:
             logging.info("ScraperAPI is reachable.")
             return True

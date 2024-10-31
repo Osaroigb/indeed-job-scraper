@@ -26,7 +26,7 @@ def get_last_page(search_url):
         }
 
         # Make a request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=10)
         response.raise_for_status()  # Raise an error if the request fails
 
         # Parse HTML and extract the last page number or check for no results

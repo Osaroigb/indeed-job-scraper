@@ -24,7 +24,7 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
         }
 
         # Make request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -90,7 +90,7 @@ def scrape_job_details(job_listing):
         }
 
         # Send request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=3)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -115,8 +115,8 @@ def scrape_job_details(job_listing):
         apply_now_link = apply_now_element['href'] if apply_now_element and apply_now_element.has_attr('href') else "N/A"
 
         if (apply_now_link == "N/A"):
-            apply_now_element = soup.find('button', id='indeedApplyButton').find('span')
-            apply_now_link = apply_now_element.get_text(strip=True) if apply_now_element else "N/A"
+            apply_now_fallback = soup.select_one('button#indeedApplyButton > span')
+            apply_now_link = apply_now_fallback.get_text(strip=True)
 
         # Update job listing with new details
         with get_session() as session:
