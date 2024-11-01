@@ -97,10 +97,6 @@ def scrape_job_details(job_listing):
         # Extract the stars rating
         stars_element = soup.select_one('div.css-1unnuiz span')
         stars = stars_element.get_text(strip=True) if stars_element else "N/A"
-
-        # Extract job location
-        # location_element = soup.select_one('div[data-testid="job-location"]')
-        # location = location_element.get_text(strip=True) if location_element else "N/A"
         
         # Extract the job type
         job_type_element = soup.select_one('div.js-match-insights-provider-g6kqeb .js-match-insights-provider-tvvxwd')
@@ -112,17 +108,12 @@ def scrape_job_details(job_listing):
 
         # Extract the "Apply Now" link
         apply_now_element = soup.select_one('button[contenthtml="Apply now"]')
-        apply_now_link = apply_now_element['href'] if apply_now_element and apply_now_element.has_attr('href') else "N/A"
-
-        if (apply_now_link == "N/A"):
-            apply_now_fallback = soup.select_one('button#indeedApplyButton > span')
-            apply_now_link = apply_now_fallback.get_text(strip=True)
+        apply_now_link = apply_now_element['href'] if apply_now_element and apply_now_element.has_attr('href') else "Apply now"
 
         # Update job listing with new details
         with get_session() as session:
             listing = session.query(JobListing).filter_by(id=job_listing.id).first()
             listing.stars = stars
-            # listing.location = location
             listing.job_type = job_type
             listing.full_description = full_description
             listing.apply_now_link = apply_now_link

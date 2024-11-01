@@ -8,9 +8,9 @@ load_dotenv()
 
 # Constants for environment variable names
 BASE_URL_VAR = "BASE_URL"
-MAX_BOTS_VAR = "MAX_BOTS"
+MAX_BOTS_VAR = "MAX_BOTS" # Maximum number of concurrent bots
 RETRY_LIMIT_VAR = "RETRY_LIMIT"
-LOCATION_VAR = "LOCATION"
+LOCATION_VAR = "LOCATION" # Target job location
 DATABASE_URI_VAR = "DATABASE_URI"
 SCRAPER_API_KEY_VAR = "SCRAPER_API_KEY"
 SCRAPER_API_URL_VAR = "SCRAPER_API_URL"

@@ -5,6 +5,7 @@ from database.models import JobSearch
 from bots.bot_manager import run_bot_manager
 from jobs.job_cleaner import clean_job_titles
 from database import engine, Base, get_session
+from database.export_to_csv import export_tables_to_csv
 from scraper_utils.last_page_finder import store_last_pages
 from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
 
@@ -96,6 +97,9 @@ def main():
 
     # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
     run_bot_manager()
+
+    # Export tables to CSV files
+    export_tables_to_csv()
     
     # Log performance metrics after scraping
     log_performance_metrics()

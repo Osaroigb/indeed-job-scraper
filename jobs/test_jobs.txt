@@ -1,3 +1,100 @@
-Childbirth Educator
-Athletic Trainer
-Sports Psychologist
+General Practitioner (GP)
+Paediatrician
+Cardiologist
+Neurologist
+Oncologist
+Orthopaedic Surgeon
+Plastic Surgeon
+Dermatologist
+Ophthalmologist
+Anesthesiologist
+Radiologist
+Psychiatrist
+Gastroenterologist
+Urologist
+Obstetrician/Gynecologist (OB/GYN)
+Otolaryngologist (ENT Specialist)
+Emergency Medicine Physician
+Rheumatologist
+Endocrinologist
+Registered Nurse (RN)
+Nurse Practitioner (NP)
+Licensed Practical Nurse (LPN)
+Nurse Anesthetist (CRNA)
+Clinical Nurse Specialist (CNS)
+Nurse Midwife
+Nurse Educator
+Neonatal Nurse
+Critical Care Nurse
+Travel Nurse
+Paediatric Nurse
+Physician Assistant (PA)
+Physical Therapist (PT)
+Occupational Therapist (OT)
+Speech-Language Pathologist (SLP)
+Respiratory Therapist
+Radiologic Technologist
+Ultrasound Technologist
+Medical Laboratory Technician (MLT)
+Cardiovascular Technologist
+Surgical Technologist
+Dietitian/Nutritionist
+Exercise Physiologist
+Audiologist
+Radiation Therapist
+Phlebotomist
+Medical Assistant
+Paramedic
+Emergency Medical Technician (EMT)
+Pharmacist
+Pharmacy Technician
+Clinical Pharmacist
+Pharmaceutical Sales Representative
+Pharmaceutical Research Scientist
+Psychologist
+Clinical Social Worker
+Mental Health Counselor
+Marriage and Family Therapist (MFT)
+Psychiatric Technician
+Substance Abuse Counsellor
+Behavioural Therapist
+School Counsellor
+Healthcare Administrator
+Medical Office Manager
+Health Information Manager
+Medical Coder/Biller
+Medical Records Technician
+Health Informatics Specialist
+Compliance Officer
+Hospital Administrator
+Patient Services Representative
+Human Resources Specialist in Healthcare
+Epidemiologist
+Public Health Nurse
+Health Educator
+Community Health Worker
+Public Health Analyst
+Biostatistician
+Environmental Health Specialist
+Physical Therapy Assistant
+Occupational Therapy Assistant
+Recreational Therapist
+Massage Therapist
+Chiropractor
+Dentist
+Dental Hygienist
+Dental Assistant
+Orthodontist
+Oral and Maxillofacial Surgeon
+Endodontist
+Periodontist
+Acupuncturist
+Naturopathic Doctor (ND)
+Homoeopathic Practitioner
+Herbalist
+Optometrist
+Ophthalmic Technician
+Ophthalmic Assistant
+Optician
+Biomedical Scientist
+Clinical Research Coordinator
