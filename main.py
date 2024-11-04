@@ -1,13 +1,12 @@
 import os
 import requests
 from config import logging, Config
-from database.models import JobSearch
 from bots.bot_manager import run_bot_manager
 from jobs.job_cleaner import clean_job_titles
 from database import engine, Base, get_session
+from database.models import JobListing, JobSearch
 from database.export_to_csv import export_tables_to_csv
-from scraper_utils.last_page_finder import store_last_pages
-from jobs.link_generator import read_job_titles, store_generated_links, store_pagination_links
+from jobs.link_generator import read_job_titles, store_generated_urls, store_pagination_links
 
 
 # Use Config class to access ENVs
@@ -20,7 +19,11 @@ def scraper_api_health_check():
     """
     Checks if ScraperAPI is accessible. Terminates the script if unavailable.
     """
-    params = {'api_key': SCRAPER_API_KEY, 'url': BASE_URL}
+    params = {
+        'api_key': SCRAPER_API_KEY, 
+        'url': BASE_URL,
+        'country': 'GB'
+    }
 
     try:
         response = requests.get(SCRAPER_API_URL, params=params, timeout=10)
@@ -47,6 +50,8 @@ def log_performance_metrics():
         logging.info(f"Total job titles: {total_jobs}")
         logging.warning(f"Successfully scraped: {total_scraped}")
         logging.info(f"Scraping success rate: {success_rate:.2f}%")
+        logging.warning(f"Concurrent threads used: {Config.MAX_BOTS}")
+        logging.info(f"API credits used this session: {session.query(JobListing).count()}")  # Approximate API usage metric
 
 
 def main():
@@ -76,7 +81,7 @@ def main():
     logging.info(len(job_titles))
     
     # Store generated links in the database
-    store_generated_links(job_titles)
+    store_generated_urls(job_titles)
     logging.info("Process completed: Job links generated and stored.")
 
 
@@ -88,15 +93,15 @@ def main():
         logging.warning(f"Failed to delete cleaned_jobs file: {e}")
 
 
-    # Retrieve and store last page for each job link
-    store_last_pages()
+    # Run bot manager for last page processing
+    run_bot_manager(phase="last_page")
 
     # Generate and store pagination links for each job link
     store_pagination_links()
     logging.info("Pagination links for each job search stored in the database.")
 
     # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
-    run_bot_manager()
+    run_bot_manager(phase="scraping")
 
     # Export tables to CSV files
     export_tables_to_csv()

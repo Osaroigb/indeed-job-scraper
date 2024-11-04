@@ -20,7 +20,8 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
         # Set up ScraperAPI endpoint and parameters
         payload = {
             'api_key': SCRAPER_API_KEY,
-            'url': page_url
+            'url': page_url,
+            'country': 'GB'
         }
 
         # Make request to ScraperAPI
@@ -86,7 +87,8 @@ def scrape_job_details(job_listing):
         # Construct the ScraperAPI request for the job link
         payload = {
             'api_key': SCRAPER_API_KEY,
-            'url': job_listing.job_link
+            'url': job_listing.job_link,
+            'country': 'GB'
         }
 
         # Send request to ScraperAPI

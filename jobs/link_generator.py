@@ -22,7 +22,7 @@ def generate_url(job_title, location="London"):
     return f"{BASE_URL}/jobs?q={formatted_title}&l={location}"
 
 
-def store_generated_links(job_titles):
+def store_generated_urls(job_titles):
     with get_session() as session:
 
         for title in job_titles:

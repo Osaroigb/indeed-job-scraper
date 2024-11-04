@@ -1,3 +1,3 @@
 from .job_cleaner import clean_job_titles
 from .job_scraper import scrape_jobs_from_page, scrape_job_details
-from .link_generator import read_job_titles, generate_url, store_generated_links, generate_pagination_links, store_pagination_links
+from .link_generator import read_job_titles, generate_url, store_generated_urls, generate_pagination_links, store_pagination_links

@@ -1,1 +1,1 @@
-from .last_page_finder import get_last_page, store_last_pages
+from .last_page_finder import get_last_page

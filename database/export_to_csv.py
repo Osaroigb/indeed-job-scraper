@@ -44,6 +44,6 @@ def export_tables_to_csv():
     """
     with get_session() as session:
         db_table_to_csv(session.query(JobSearch), 'JobSearch')
-        db_table_to_csv(session.query(JobListing), 'JobListing')
+        # db_table_to_csv(session.query(JobListing), 'JobListing')
 
     logging.info("All tables have been exported to CSV.")

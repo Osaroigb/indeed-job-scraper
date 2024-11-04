@@ -18,8 +18,8 @@ SCRAPER_API_URL_VAR = "SCRAPER_API_URL"
 # Configuration class
 class Config:
     BASE_URL: str = os.getenv(BASE_URL_VAR)
-    MAX_BOTS: int = int(os.getenv(MAX_BOTS_VAR, 5))  # Default to 5 if not set
-    RETRY_LIMIT: int = int(os.getenv(RETRY_LIMIT_VAR, 3))  # Default to 3 if not set
+    MAX_BOTS: int = int(os.getenv(MAX_BOTS_VAR))
+    RETRY_LIMIT: int = int(os.getenv(RETRY_LIMIT_VAR))
     LOCATION: str = os.getenv(LOCATION_VAR)
     DATABASE_URI: str = os.getenv(DATABASE_URI_VAR)
     SCRAPER_API_KEY: str = os.getenv(SCRAPER_API_KEY_VAR)
