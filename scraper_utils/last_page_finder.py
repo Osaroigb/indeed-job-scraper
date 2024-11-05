@@ -21,11 +21,11 @@ def get_last_page(search_url):
         payload = {
             'api_key': SCRAPER_API_KEY,
             'url': last_page_url,
-            'country': 'GB'
+            # 'country': 'GB'
         }
 
         # Make a request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=10)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=20)
         response.raise_for_status()  # Raise an error if the request fails
 
         # Parse HTML and extract the last page number or check for no results
@@ -34,7 +34,7 @@ def get_last_page(search_url):
         # Check for "no results" message
         no_results_message = soup.select_one(".jobsearch-NoResult-messageContainer")
         if no_results_message:
-            logging.info(f"No results found for {search_url}")
+            logging.info(f"No search results found for {search_url}")
             return 0  # Indicates that no pages are available for this search
 
         # Locate the pagination container and extract the last page number

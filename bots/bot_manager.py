@@ -40,11 +40,6 @@ def process_last_page(job_search):
                 job.last_page_number = last_page
                 session.commit()
 
-            if last_page == 0:
-                logging.warning(f"No results for {job_search.job_title}")
-            else:
-                logging.info(f"Last page for {job_search.job_title} determined as {last_page}")
-
             success = True
             break  # Exit loop if successful
 
