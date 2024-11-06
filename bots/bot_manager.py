@@ -11,24 +11,19 @@ from jobs.job_scraper import scrape_jobs_from_page, scrape_job_details
 # Use Config class to access ENVs
 MAX_BOTS = Config.MAX_BOTS
 RETRY_LIMIT = Config.RETRY_LIMIT
-
-logging.warning('maximum number of bots below!')
-logging.info(MAX_BOTS)
-logging.info(type(MAX_BOTS))
-
-logging.warning('maximum number of retry limits below!')
-logging.info(RETRY_LIMIT)
-logging.info(type(RETRY_LIMIT))
+TIMEOUT_URLS_FILE = Config.TIMEOUT_URLS_FILE
 
 
 def process_last_page(job_search):
     """
     Retrieve and update the last page number for a given job search.
     Includes a retry mechanism with exponential backoff and logs the time taken.
+    If the last page retrieval fails due to a timeout, store the URL in a text file.
     """
     start_time = time.time()
     success = False
     retry_count = 0
+    last_page_url = f"{job_search.generated_link}&start=3000"  # Construct the last page URL
 
     while retry_count < RETRY_LIMIT:
         try:
@@ -43,6 +38,11 @@ def process_last_page(job_search):
             success = True
             break  # Exit loop if successful
 
+        except requests.exceptions.Timeout:
+            retry_count += 1
+            logging.warning(f"Timeout error retrieving last page for {job_search.job_title}. Retry {retry_count}/{RETRY_LIMIT}.")
+            time.sleep(2 ** retry_count)  # Exponential backoff for retries
+
         except Exception as e:
             retry_count += 1
             logging.warning(f"Error retrieving last page for {job_search.job_title}. Retry {retry_count}/{RETRY_LIMIT}.")
@@ -50,6 +50,11 @@ def process_last_page(job_search):
 
     if not success:
         logging.error(f"Failed to determine last page for {job_search.job_title} after {RETRY_LIMIT} attempts")
+
+        # Store the URL in a file for later retry
+        with open(TIMEOUT_URLS_FILE, "a") as f:
+            f.write(f"{last_page_url}\n")
+        logging.info(f"Stored timeout URL for {job_search.job_title} in {TIMEOUT_URLS_FILE}")
 
     end_time = time.time()
     logging.info(f"Completed last page retrieval for {job_search.job_title} in {end_time - start_time:.2f} seconds")

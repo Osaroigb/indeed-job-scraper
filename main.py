@@ -26,7 +26,7 @@ def scraper_api_health_check():
     }
 
     try:
-        response = requests.get(SCRAPER_API_URL, params=params, timeout=20)
+        response = requests.get(SCRAPER_API_URL, params=params, timeout=30)
         if response.status_code == 200:
             logging.info("ScraperAPI is reachable.")
             return True
@@ -64,8 +64,8 @@ def main():
     Config.validate_env()
 
     #? Define the input and output file names using absolute paths
-    # input_file = os.path.join(os.path.dirname(__file__), 'jobs/target_jobs.txt')
-    input_file = os.path.join(os.path.dirname(__file__), 'jobs/test_jobs.txt')
+    input_file = os.path.join(os.path.dirname(__file__), 'jobs/target_jobs.txt')
+    # input_file = os.path.join(os.path.dirname(__file__), 'jobs/test_jobs.txt')
     output_file = os.path.join(os.path.dirname(__file__), 'jobs/cleaned_jobs.txt')
 
     # Run the job cleaner to create cleaned_jobs.txt

@@ -25,7 +25,7 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
         }
 
         # Make request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=10)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=30)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -92,7 +92,7 @@ def scrape_job_details(job_listing):
         }
 
         # Send request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=10)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=30)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
