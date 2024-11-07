@@ -100,9 +100,6 @@ def main():
     store_pagination_links()
     logging.info("Pagination links for each job search stored in the database.")
 
-    # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
-    # run_bot_manager(phase="scraping")
-
     # Export tables to CSV files
     export_tables_to_csv()
 

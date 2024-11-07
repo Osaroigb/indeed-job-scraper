@@ -14,7 +14,7 @@ def run():
     Config.validate_env()
 
     # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
-    run_bot_manager(phase="scraping") # TODO: comment for testing
+    run_bot_manager(phase="job_search_scraping")
 
     # Export tables to CSV files
     export_tables_to_csv()
@@ -24,5 +24,5 @@ def run():
     logging.warning("All tasks completed and performance metrics logged")
 
 
-if __name__ == "__run__":
+if __name__ == "__main__":
     run()

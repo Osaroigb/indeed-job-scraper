@@ -154,7 +154,7 @@ def run_bot_manager(phase: str):
 
         logging.warning("Last page retrieval phase completed.")
 
-    elif phase == "scraping":
+    elif phase == "job_search_scraping":
 
         #? Phase 2: Process job searches (pagination links)
         with get_session() as session:
@@ -173,6 +173,8 @@ def run_bot_manager(phase: str):
         logging.warning("Job search phase completed.")
 
 
+    elif phase == "job_listing_scraping":
+
         #? Phase 3: Process job listing details after all paginated pages are scraped
         with get_session() as session:
             job_listings = session.query(JobListing).filter(JobListing.apply_now_link.is_(None)).all()
@@ -188,5 +190,6 @@ def run_bot_manager(phase: str):
                     logging.error(f"Bot manager encountered an error in job listing details phase: {e}")
 
         logging.info("Job listing details phase completed.")
+
 
     logging.warning("Bot manager completed all tasks.")
