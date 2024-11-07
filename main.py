@@ -64,18 +64,18 @@ def main():
     Config.validate_env()
 
     #? Define the input and output file names using absolute paths
-    input_file = os.path.join(os.path.dirname(__file__), 'jobs/target_jobs.txt')
-    # input_file = os.path.join(os.path.dirname(__file__), 'jobs/test_jobs.txt')
-    output_file = os.path.join(os.path.dirname(__file__), 'jobs/cleaned_jobs.txt')
+    input_txt_file = os.path.join(os.path.dirname(__file__), 'jobs/target_jobs.txt')
+    # input_txt_file = os.path.join(os.path.dirname(__file__), 'jobs/test_jobs.txt')
+    output_txt_file = os.path.join(os.path.dirname(__file__), 'jobs/cleaned_jobs.txt')
 
     # Run the job cleaner to create cleaned_jobs.txt
-    clean_job_titles(input_file, output_file)
+    clean_job_titles(input_txt_file, output_txt_file)
 
     # Initialize the database (create tables if they don't exist)
     Base.metadata.create_all(engine)
 
     # Read job titles from the cleaned_jobs.txt file
-    job_titles = read_job_titles(output_file)
+    job_titles = read_job_titles(output_txt_file)
 
     logging.warning("job_titles length below!")
     logging.info(len(job_titles))
@@ -87,7 +87,7 @@ def main():
 
     # Clean up the temporary cleaned_jobs.txt file
     try:
-        os.remove(output_file)
+        os.remove(output_txt_file)
         logging.info("cleaned_jobs file has been deleted.")
     except Exception as e:
         logging.warning(f"Failed to delete cleaned_jobs file: {e}")
@@ -101,11 +101,11 @@ def main():
     logging.info("Pagination links for each job search stored in the database.")
 
     # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
-    # run_bot_manager(phase="scraping") # TODO: comment for testing
+    # run_bot_manager(phase="scraping")
 
     # Export tables to CSV files
     export_tables_to_csv()
-    
+
     # Log performance metrics after scraping
     log_performance_metrics()
     logging.warning("All tasks completed and performance metrics logged")

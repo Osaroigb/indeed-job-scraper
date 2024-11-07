@@ -43,7 +43,7 @@ def export_tables_to_csv():
     Exports JobSearch and JobListing tables to separate CSV files.
     """
     with get_session() as session:
-        db_table_to_csv(session.query(JobSearch), 'JobSearch')
-        # db_table_to_csv(session.query(JobListing), 'JobListing') # TODO: comment for testing
+        # db_table_to_csv(session.query(JobSearch), 'JobSearch')
+        db_table_to_csv(session.query(JobListing), 'JobListing')
 
     logging.info("All tables have been exported to CSV.")
