@@ -2,7 +2,7 @@ import os
 import csv
 from config import logging
 from database import get_session
-from database.models import JobSearch
+from database.models import JobListing, JobSearch
 
 
 def remove_zero_page_records(input_file, output_file):
@@ -62,11 +62,51 @@ def delete_zero_page_records():
             logging.info("No records found with last_page_number = 0 in JobSearch table.")
 
 
+def remove_na_job_titles():
+    """
+    Deletes all records from the JobListing table where job_title is 'N/A'.
+    Logs the number of records deleted.
+    """
+    with get_session() as session:
+        # Query to find all job listings with job_title = 'N/A'
+        na_job_listings = session.query(JobListing).filter(JobListing.job_title == 'N/A').all()
+        
+        # Count records to delete
+        record_count = len(na_job_listings)
+        
+        if record_count > 0:
+            for record in na_job_listings:
+                session.delete(record)
+            session.commit()
+            logging.info(f"Deleted {record_count} records with job_title = 'N/A' from JobListing table.")
+        else:
+            logging.info("No records found with job_title = 'N/A' in JobListing table.")
+
+
+def count_unique_companies():
+    """
+    Counts the total number of unique company names in the JobListing table.
+    Logs the total count of unique companies.
+    """
+    with get_session() as session:
+        # Get the count of unique company names
+        unique_companies_count = session.query(JobListing.company).distinct().count()
+        
+        logging.info(f"Total number of unique companies: {unique_companies_count}")
+        return unique_companies_count
+
+
 input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobSearch.csv')
 output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobSearch.csv')
 
-# Run the function to clean the CSV file
-remove_zero_page_records(input_csv_file, output_csv_file)
+#? Run the function to clean the CSV file
+# remove_zero_page_records(input_csv_file, output_csv_file)
 
-# Run the cleanup for job search records with last_page_number = 0
-delete_zero_page_records()
+#* Run the cleanup for job search records with last_page_number = 0
+# delete_zero_page_records()
+
+#! Remove job listings with "N/A" job titles
+# remove_na_job_titles()
+
+#TODO Count and log the total number of unique companies
+count_unique_companies()

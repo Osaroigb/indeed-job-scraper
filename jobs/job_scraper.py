@@ -21,7 +21,7 @@ def scrape_jobs_from_page(page_url, page_number, job_search_id):
         payload = {
             'api_key': SCRAPER_API_KEY,
             'url': page_url,
-            'country': 'GB'
+            # 'country': 'GB'
         }
 
         # Make request to ScraperAPI
