@@ -141,17 +141,68 @@ def upload_job_listings_from_csv(csv_file):
         logging.error(f"Error uploading job listings from CSV: {e}")
 
 
-#? Run the function to clean the CSV file
-# remove_zero_page_records(input_csv_file, output_csv_file)
+def export_non_null_apply_links_to_csv(output_file):
+    """
+    Counts and exports all records in the JobListing table where apply_now_link is NOT null.
+    Saves the results to a CSV file.
 
-#* Run the cleanup for job search records with last_page_number = 0
-# delete_zero_page_records()
+    Parameters:
+    - output_file: str, the path to save the CSV file.
+    """
+    try:
+        with get_session() as session:
+            # Query to find all job listings where apply_now_link is not null
+            job_listings = session.query(JobListing).filter(JobListing.apply_now_link.isnot(None)).all()
 
-#! Remove job listings with "N/A" job titles
-# remove_na_job_titles()
+            # Count the total number of records
+            record_count = len(job_listings)
+            logging.info(f"Total job listings with apply_now_link not null: {record_count}")
 
-#TODO Count and log the total number of unique companies
-# count_unique_companies()
+            # Export records to a CSV file
+            with open(output_file, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
 
-#* Upload cleaned job listings to the database
-# upload_job_listings_from_csv(job_listing_csv_file)
+                # Write the header
+                writer.writerow(['ID', 'Job Title', 'Company', 'Location', 'Posted Date', 
+                                 'Job Link', 'Stars', 'Job Type', 'Full Description', 'Apply Now Link'])
+
+                # Write each job listing to the CSV
+                for job in job_listings:
+                    writer.writerow([
+                        job.id,
+                        job.job_title,
+                        job.company,
+                        job.location,
+                        job.posted_date,
+                        job.job_link,
+                        job.stars,
+                        job.job_type,
+                        job.full_description,
+                        job.apply_now_link
+                    ])
+
+            logging.info(f"Exported {record_count} job listings to {output_file}")
+
+    except Exception as e:
+        logging.error(f"Error exporting job listings to CSV: {e}")
+
+
+# Example usage
+if __name__ == "__main__":
+    #? Run the function to clean the CSV file
+    # remove_zero_page_records(input_csv_file, output_csv_file)
+
+    #* Run the cleanup for job search records with last_page_number = 0
+    # delete_zero_page_records()
+
+    #! Remove job listings with "N/A" job titles
+    # remove_na_job_titles()
+
+    #TODO Count and log the total number of unique companies
+    # count_unique_companies()
+
+    #* Upload cleaned job listings to the database
+    # upload_job_listings_from_csv(job_listing_csv_file)
+
+    output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/FilteredJobListings.csv')
+    export_non_null_apply_links_to_csv(output_csv_file)

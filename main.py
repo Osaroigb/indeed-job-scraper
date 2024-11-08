@@ -43,8 +43,8 @@ def log_performance_metrics():
     Logs overall performance metrics of the scraper.
     """
     with get_session() as session:
-        total_jobs = session.query(JobSearch).count()
-        total_scraped = session.query(JobSearch).filter(JobSearch.last_page_number.isnot(None)).count()
+        total_jobs = session.query(JobListing).count()
+        total_scraped = session.query(JobListing).filter(JobListing.apply_now_link.isnot(None)).count()
         success_rate = (total_scraped / total_jobs) * 100 if total_jobs > 0 else 0
 
         logging.info(f"Total job titles: {total_jobs}")
