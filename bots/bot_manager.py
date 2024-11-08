@@ -177,7 +177,7 @@ def run_bot_manager(phase: str):
 
         #? Phase 3: Process job listing details after all paginated pages are scraped
         with get_session() as session:
-            job_listings = session.query(JobListing).filter(JobListing.apply_now_link.is_(None)).all()
+            job_listings = session.query(JobListing).all()
 
         with ThreadPoolExecutor(max_workers=MAX_BOTS) as executor:
             futures = [executor.submit(process_job_listing_details, job_listing) for job_listing in job_listings]

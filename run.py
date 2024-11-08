@@ -14,7 +14,8 @@ def run():
     Config.validate_env()
 
     # Run the bot manager to handle concurrent job scraping and detailed job information retrieval
-    run_bot_manager(phase="job_search_scraping")
+    # run_bot_manager(phase="job_search_scraping")
+    run_bot_manager(phase="job_listing_scraping")
 
     # Export tables to CSV files
     export_tables_to_csv()

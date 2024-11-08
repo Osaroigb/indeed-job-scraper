@@ -88,11 +88,11 @@ def scrape_job_details(job_listing):
         payload = {
             'api_key': SCRAPER_API_KEY,
             'url': job_listing.job_link,
-            'country': 'GB'
+            # 'country': 'GB'
         }
 
         # Send request to ScraperAPI
-        response = requests.get(SCRAPER_API_URL, params=payload, timeout=30)
+        response = requests.get(SCRAPER_API_URL, params=payload, timeout=120)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 

@@ -2,7 +2,15 @@ import os
 import csv
 from config import logging
 from database import get_session
+from datetime import datetime, timezone
 from database.models import JobListing, JobSearch
+
+
+# input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobSearch.csv')
+# output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobSearch.csv')
+
+# job_listing_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobListing.csv')
+# cleaned_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobListing.csv')
 
 
 def remove_zero_page_records(input_file, output_file):
@@ -96,8 +104,42 @@ def count_unique_companies():
         return unique_companies_count
 
 
-input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobSearch.csv')
-output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobSearch.csv')
+def upload_job_listings_from_csv(csv_file):
+    """
+    Reads entries from a CSV file and inserts them into the JobListing table.
+    
+    Parameters:
+    - csv_file: str, the path to the CSV file to read
+    """
+    try:
+        with open(csv_file, 'r') as file:
+            reader = csv.DictReader(file)
+            job_listings = []
+            for row in reader:
+                job_listings.append(JobListing(
+                    job_search_id=int(row['job_search_id']),
+                    date_scraped=datetime.now(timezone.utc),
+                    page_number=int(row['page_number']),
+                    job_title=row['job_title'],
+                    company=row['company'],
+                    location=row['location'],
+                    posted_date=row['posted_date'],
+                    job_link=row['job_link'],
+                    stars=row['stars'] if row['stars'] else None,
+                    job_type=row['job_type'] if row['job_type'] else None,
+                    full_description=row['full_description'] if row['full_description'] else None,
+                    apply_now_link=row['apply_now_link'] if row['apply_now_link'] else None
+                ))
+
+        # Insert the job listings into the database
+        with get_session() as session:
+            session.bulk_save_objects(job_listings)
+            session.commit()
+            logging.info(f"Uploaded {len(job_listings)} job listings from {csv_file} into the database.")
+
+    except Exception as e:
+        logging.error(f"Error uploading job listings from CSV: {e}")
+
 
 #? Run the function to clean the CSV file
 # remove_zero_page_records(input_csv_file, output_csv_file)
@@ -109,4 +151,7 @@ output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJo
 # remove_na_job_titles()
 
 #TODO Count and log the total number of unique companies
-count_unique_companies()
+# count_unique_companies()
+
+#* Upload cleaned job listings to the database
+# upload_job_listings_from_csv(job_listing_csv_file)
