@@ -2,15 +2,9 @@ import os
 import csv
 from config import logging
 from database import get_session
+from sqlalchemy import func, desc
 from datetime import datetime, timezone
 from database.models import JobListing, JobSearch
-
-
-# input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobSearch.csv')
-# output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobSearch.csv')
-
-# job_listing_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobListing.csv')
-# cleaned_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobListing.csv')
 
 
 def remove_zero_page_records(input_file, output_file):
@@ -152,7 +146,15 @@ def export_non_null_apply_links_to_csv(output_file):
     try:
         with get_session() as session:
             # Query to find all job listings where apply_now_link is not null
-            job_listings = session.query(JobListing).filter(JobListing.apply_now_link.isnot(None)).all()
+            # job_listings = session.query(JobListing).filter(JobListing.apply_now_link.isnot(None)).all()
+
+            # Query to find the first 100 job listings where apply_now_link is not null
+            job_listings = (
+                session.query(JobListing)
+                .filter(JobListing.apply_now_link.isnot(None))
+                .limit(100)
+                .all()
+            )
 
             # Count the total number of records
             record_count = len(job_listings)
@@ -187,8 +189,51 @@ def export_non_null_apply_links_to_csv(output_file):
         logging.error(f"Error exporting job listings to CSV: {e}")
 
 
+def export_job_count_by_company(output_file):
+    """
+    Generates a CSV file that lists companies and their corresponding job counts, 
+    ordered in descending order of job listings.
+
+    Parameters:
+    - output_file: str, the path to save the CSV file.
+    """
+    try:
+        with get_session() as session:
+            # Query to count jobs per company and order by count in descending order
+            job_counts = (
+                session.query(JobListing.company, func.count(JobListing.id).label("job_count"))
+                .group_by(JobListing.company)
+                .order_by(desc("job_count"))
+                .all()
+            )
+
+            # Export the results to a CSV file
+            with open(output_file, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                # Write the header
+                writer.writerow(["Company", "Job Count"])
+
+                # Write each company's job count to the CSV
+                for company, job_count in job_counts:
+                    writer.writerow([company, job_count])
+
+            logging.info(f"Exported job counts by company to {output_file}")
+
+    except Exception as e:
+        logging.error(f"Error exporting job counts by company to CSV: {e}")
+
+
 # Example usage
 if __name__ == "__main__":
+    # input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobSearch.csv')
+    # output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobSearch.csv')
+
+    # job_listing_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobListing.csv')
+    # cleaned_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/CleanedJobListing.csv')
+
+    # output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/FilteredJobListings.csv')
+    # output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/100JobListings.csv')
+
     #? Run the function to clean the CSV file
     # remove_zero_page_records(input_csv_file, output_csv_file)
 
@@ -198,11 +243,13 @@ if __name__ == "__main__":
     #! Remove job listings with "N/A" job titles
     # remove_na_job_titles()
 
+    # export_non_null_apply_links_to_csv(output_csv_file)
+
     #TODO Count and log the total number of unique companies
     # count_unique_companies()
 
     #* Upload cleaned job listings to the database
     # upload_job_listings_from_csv(job_listing_csv_file)
 
-    output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/FilteredJobListings.csv')
-    export_non_null_apply_links_to_csv(output_csv_file)
+    output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobCountByCompany.csv')
+    export_job_count_by_company(output_csv_file)
