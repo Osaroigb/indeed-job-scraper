@@ -15,7 +15,8 @@ DATABASE_URI_VAR = "DATABASE_URI"
 SCRAPER_API_KEY_VAR = "SCRAPER_API_KEY"
 SCRAPER_API_URL_VAR = "SCRAPER_API_URL"
 TIMEOUT_URLS_FILE_VAR = "TIMEOUT_URLS_FILE"
-
+APOLLO_API_KEY_VAR = "APOLLO_API_KEY"
+APOLLO_API_URL_VAR = "APOLLO_API_URL"
 
 # Configuration class
 class Config:
@@ -27,6 +28,8 @@ class Config:
     SCRAPER_API_KEY: str = os.getenv(SCRAPER_API_KEY_VAR)
     SCRAPER_API_URL: str = os.getenv(SCRAPER_API_URL_VAR)
     TIMEOUT_URLS_FILE: str = os.getenv(TIMEOUT_URLS_FILE_VAR)
+    APOLLO_API_KEY: str = os.getenv(APOLLO_API_KEY_VAR)
+    APOLLO_API_URL: str = os.getenv(APOLLO_API_URL_VAR)
 
     @classmethod
     def validate_env(cls):
@@ -38,7 +41,9 @@ class Config:
             RETRY_LIMIT_VAR,
             LOCATION_VAR,
             BASE_URL_VAR,
-            TIMEOUT_URLS_FILE_VAR
+            TIMEOUT_URLS_FILE_VAR,
+            APOLLO_API_KEY_VAR,
+            APOLLO_API_URL_VAR
         ]
 
         missing_vars = [var for var in required_vars if not os.getenv(var)]
