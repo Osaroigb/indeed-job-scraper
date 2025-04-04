@@ -229,7 +229,7 @@ def export_job_count_by_company(output_file):
         logging.error(f"Error exporting job counts by company to CSV: {e}")
 
 
-def fetch_apollo_people_data(input_file, output_file):
+def fetch_apollo_data(input_file, output_file):
     """
     Fetches enriched people data from Apollo.io API based on provided company names.
     Saves the results to a CSV file.
@@ -244,6 +244,32 @@ def fetch_apollo_people_data(input_file, output_file):
         "Cache-Control": "no-cache",
         "Content-Type": "application/json"
     }
+
+    person_titles = [
+        "Compensation & Benefits",
+        "Culture, Diversity & Inclusion",
+        "Employee & Labor Relations",
+        "Health & Safety",
+        "Human Resource Information System",
+        "Human Resources",
+        "HR Business Partner",
+        "Learning & Development",
+        "Organizational Development",
+        "Recruiting & Talent Acquisition",
+        "Talent Management",
+        "Workforce Management",
+        "People Operations",
+        "Recruitment",
+        "Talent",
+        "Recruiter",
+        "Equity and Inclusion",
+        "Talent Acquisition",
+        "Recruitment Lead",
+        "Recruiting",
+        "HR Business Advisor",
+        "Employee Relations Associate",
+        "HR Business Advisor"
+    ]
 
     enriched_data = []
     has_errors = False
@@ -261,7 +287,9 @@ def fetch_apollo_people_data(input_file, output_file):
                 payload = {
                     "person_locations": ["London, United Kingdom"],
                     "contact_email_status": ["likely to engage"],
-                    "person_titles": ["human resources"],
+                    "person_titles": person_titles,
+                    # "job_functions": ["human resources"],  # Assuming job_functions filter supports HR roles
+                    # "departments": ["master human resources"],
                     "page": 1,
                     "per_page": 100,
                     "q_keywords": company_name
@@ -334,6 +362,105 @@ def fetch_apollo_people_data(input_file, output_file):
         logging.warning("No data was written to the CSV due to errors.")
 
 
+def fetch_apollo_people_data(input_file: str, output_file: str):
+    """
+    Fetches enriched people data from Apollo.io API based on provided company names.
+    Saves the results to a CSV file.
+
+    Parameters:
+    - input_file: str, path to the input CSV file with companies.
+    - output_file: str, path to save the enriched data CSV file.
+    """
+    # Job titles and industries based on the provided documentation
+    person_titles = [
+        "Human Resources Manager", "Human Resources", "Human Resources Generalist", "HR Manager",
+        "HR", "HR Assistant", "HR Officer", "HR Coordinator", "HR Administrator", "HR Executive",
+        "Compensation & Benefits", "Culture, Diversity & Inclusion", "Employee & Labor Relations",
+        "Health & Safety", "Human Resource Information System", "Learning & Development",
+        "Organizational Development", "Recruiting & Talent Acquisition", "Talent Management",
+        "Workforce Management", "People Operations"
+    ]
+
+    # industries = ["computer software", "information technology and services"]
+    # num_employees = "1,10;11,20;21,50;51,100;101,200;201,500;501,1000;10001+;5001,10000;2001,5000;1001,2000"
+    # revenue_range_min = 100000
+    # revenue_range_max = 1000000
+
+    enriched_data = []
+
+    try:
+        # Read the input file
+        with open(input_file, 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+
+            for row in reader:
+                company_name = row.get("Company")
+                logging.info(f"Fetching data for company: {company_name}")
+
+                # Initialize payload for the API request
+                payload = {
+                    # "numEmployees": num_employees,
+                    "qKeywords": company_name,
+                    "locations": "London, United Kingdom",
+                    "apiKey": APOLLO_API_KEY,
+                    "personTitle": ";".join(person_titles),
+                    # "industry": ";".join(industries),
+                    # "revenueRangeMin": revenue_range_min,
+                    # "revenueRangeMax": revenue_range_max,
+                    "next": ""  # Start with an empty pagination token
+                }
+
+                while True:
+                    try:
+                        # Make the API request
+                        response = requests.get(APOLLO_API_URL, params=payload)
+                        response.raise_for_status()
+                        data = response.json()
+
+                        logging.info(f"Data retrieved for company: {company_name}")
+
+                        # Process the "people" section in the response
+                        if "people" in data:
+                            for person in data["people"]:
+                                enriched_data.append({
+                                    "First Name": person.get("firstName", "N/A"),
+                                    "Last Name": person.get("lastName", "N/A"),
+                                    "Job Title": person.get("title", "N/A"),
+                                    "Email": person.get("email", "N/A"),
+                                    "Company": person.get("organizationName", "N/A"),
+                                    "LinkedIn URL": person.get("linkedinUrl", "N/A")
+                                })
+
+                        # Handle pagination
+                        next_token = data.get("next", "")
+                        if not next_token:
+                            break  # Exit the loop if there's no next page
+                        payload["next"] = next_token
+
+                    except requests.exceptions.RequestException as e:
+                        logging.error(f"Request error for company {company_name}: {e}")
+                        break
+
+    except Exception as e:
+        logging.error(f"Error during data enrichment: {e}")
+
+    # Write to CSV if data was successfully enriched
+    if enriched_data:
+        try:
+            with open(output_file, 'w', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=[
+                    "First Name", "Last Name", "Job Title", "Email", "Company", "LinkedIn URL"
+                ])
+                writer.writeheader()
+                writer.writerows(enriched_data)
+
+            logging.info(f"Enriched data successfully saved to {output_file}")
+        except Exception as e:
+            logging.error(f"Error saving enriched data to CSV: {e}")
+    else:
+        logging.warning("No data was written to the CSV due to errors or no results found.")
+
+
 # Example usage
 if __name__ == "__main__":
     # input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobSearch.csv')
@@ -366,6 +493,8 @@ if __name__ == "__main__":
     # export_job_count_by_company(output_csv_file)
 
     # input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/JobCountByCompany.csv')
+    output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/EmployeeData.csv')
+
     input_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/test.csv')
-    output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/EnrichedData.csv')
-    fetch_apollo_people_data(input_csv_file, output_csv_file)
+    # output_csv_file = os.path.join(os.path.dirname(__file__), 'csv_exports/TestData.csv')
+    fetch_apollo_data(input_csv_file, output_csv_file)
